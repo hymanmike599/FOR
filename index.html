@@ -8,24 +8,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js"></script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex justify-center items-center min-h-screen">
-    <div class="w-full max-w-3xl bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+    <div class="w-full max-w-lg bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">AI 交互助手</h2>
             <button onclick="toggleDarkMode()" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md">🌙</button>
         </div>
-        <div id="chatbox" class="h-[500px] overflow-y-auto border p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 space-y-2" onscroll="loadMoreMessages()"></div>
+        <div id="chatbox" class="h-80 overflow-y-auto border p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 space-y-2"></div>
         <div class="flex space-x-2">
             <input id="userInput" type="text" class="flex-1 p-2 border rounded-lg dark:bg-gray-600 dark:text-white" placeholder="请输入您的问题..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">发送</button>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-300 mt-2">AI 互动界面采用 ChatGPT 4.0，界面尚不完善，输出仅供参考。</p>
     </div>
 
     <script>
         const API_KEY = "sk-ocyVjypZVQYI4JzmpcbfKvzB27u8ERxJBYnkcp8psvCAqCVM";
         const BASE_URL = "https://cn.gptapi.asia/v1/chat/completions";
-        let chatHistory = [];
-        let isLoading = false;
 
         async function sendMessage() {
             const inputField = document.getElementById("userInput");
@@ -35,8 +32,6 @@
 
             appendMessage("user", userMessage);
             inputField.value = "";
-
-            const loadingIndicator = appendMessage("ai", "🤖 AI 正在输入...");
 
             try {
                 const res = await fetch(BASE_URL, {
@@ -53,10 +48,8 @@
 
                 const data = await res.json();
                 const aiResponse = data.choices?.[0]?.message?.content || "无响应";
-                loadingIndicator.remove();
                 appendMessage("ai", aiResponse);
             } catch (error) {
-                loadingIndicator.remove();
                 appendMessage("ai", "请求失败，请检查 API 设置");
             }
         }
@@ -64,7 +57,7 @@
         function appendMessage(role, text) {
             const chatbox = document.getElementById("chatbox");
             const messageDiv = document.createElement("div");
-            messageDiv.classList.add("p-2", "rounded-lg", "max-w-2xl", "animate-fadeIn");
+            messageDiv.classList.add("p-2", "rounded-lg", "max-w-xs", "animate-fadeIn");
             
             if (role === "user") {
                 messageDiv.classList.add("bg-blue-500", "text-white", "self-end", "ml-auto");
@@ -76,8 +69,6 @@
             messageDiv.innerHTML = text;
             chatbox.appendChild(messageDiv);
             chatbox.scrollTop = chatbox.scrollHeight;
-            chatHistory.push({ role, text });
-            return messageDiv;
         }
 
         function handleKeyPress(event) {
@@ -88,18 +79,6 @@
 
         function toggleDarkMode() {
             document.body.classList.toggle("dark");
-        }
-
-        function loadMoreMessages() {
-            const chatbox = document.getElementById("chatbox");
-            if (chatbox.scrollTop === 0 && !isLoading) {
-                isLoading = true;
-                setTimeout(() => {
-                    const previousMessages = chatHistory.slice(0, 5); // 加载更多历史消息
-                    previousMessages.forEach(msg => appendMessage(msg.role, msg.text));
-                    isLoading = false;
-                }, 1000);
-            }
         }
     </script>
 </body>
