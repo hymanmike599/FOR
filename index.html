@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 交互助手</title>
+    <title>AI 交互</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js"></script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex justify-center items-center min-h-screen">
-    <div class="w-full max-w-lg bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">AI 交互助手</h2>
-            <button onclick="toggleDarkMode()" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md">🌙</button>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <div class="w-full max-w-lg bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-bold text-center mb-4">AI 交互助手</h2>
+        <div id="chatbox" class="h-80 overflow-y-auto border p-4 bg-gray-50 rounded-lg mb-4 space-y-2">
+            <div class="text-gray-400 text-center">欢迎使用 AI 交互助手！</div>
         </div>
-        <div id="chatbox" class="h-80 overflow-y-auto border p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 space-y-2"></div>
         <div class="flex space-x-2">
-            <input id="userInput" type="text" class="flex-1 p-2 border rounded-lg dark:bg-gray-600 dark:text-white" placeholder="请输入您的问题..." onkeypress="handleKeyPress(event)">
+            <input id="userInput" type="text" class="flex-1 p-2 border rounded-lg" placeholder="请输入您的问题..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">发送</button>
         </div>
     </div>
@@ -30,6 +28,7 @@
             const userMessage = inputField.value.trim();
             if (!userMessage) return;
 
+            // 添加用户消息到聊天框
             appendMessage("user", userMessage);
             inputField.value = "";
 
@@ -38,7 +37,7 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${API_KEY}`,
+                        Authorization: Bearer ${API_KEY},
                     },
                     body: JSON.stringify({
                         model: "gpt-4",
@@ -57,28 +56,21 @@
         function appendMessage(role, text) {
             const chatbox = document.getElementById("chatbox");
             const messageDiv = document.createElement("div");
-            messageDiv.classList.add("p-2", "rounded-lg", "max-w-xs", "animate-fadeIn");
-            
+            messageDiv.classList.add("p-2", "rounded-lg", "max-w-xs");
             if (role === "user") {
                 messageDiv.classList.add("bg-blue-500", "text-white", "self-end", "ml-auto");
             } else {
                 messageDiv.classList.add("bg-gray-300", "text-black", "self-start", "mr-auto");
-                messageDiv.innerHTML = marked.parse(text); // Markdown 渲染
             }
-            
-            messageDiv.innerHTML = text;
+            messageDiv.textContent = text;
             chatbox.appendChild(messageDiv);
-            chatbox.scrollTop = chatbox.scrollHeight;
+            chatbox.scrollTop = chatbox.scrollHeight; // 滚动到底部
         }
 
         function handleKeyPress(event) {
             if (event.key === "Enter") {
                 sendMessage();
             }
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark");
         }
     </script>
 </body>
