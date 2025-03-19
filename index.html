@@ -4,37 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 交互</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            font-size: 16px;
-        }
-        #response {
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background: #f9f9f9;
-            min-height: 50px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h2>AI 交互</h2>
-    <input type="text" id="userInput" placeholder="请输入您的问题">
-    <button onclick="sendMessage()">发送</button>
-    <div id="response">AI 回复将显示在这里</div>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <div class="w-full max-w-lg bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-bold text-center mb-4">AI 交互助手</h2>
+        <div id="chatbox" class="h-80 overflow-y-auto border p-4 bg-gray-50 rounded-lg mb-4 space-y-2">
+            <div class="text-gray-400 text-center">欢迎使用 AI 交互助手！</div>
+        </div>
+        <div class="flex space-x-2">
+            <input id="userInput" type="text" class="flex-1 p-2 border rounded-lg" placeholder="请输入您的问题..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">发送</button>
+        </div>
+    </div>
 
     <script>
         const API_KEY = "sk-ocyVjypZVQYI4JzmpcbfKvzB27u8ERxJBYnkcp8psvCAqCVM";
@@ -42,12 +24,14 @@
 
         async function sendMessage() {
             const inputField = document.getElementById("userInput");
-            const responseDiv = document.getElementById("response");
+            const chatbox = document.getElementById("chatbox");
             const userMessage = inputField.value.trim();
             if (!userMessage) return;
-            
-            responseDiv.innerText = "处理中...";
-            
+
+            // 添加用户消息到聊天框
+            appendMessage("user", userMessage);
+            inputField.value = "";
+
             try {
                 const res = await fetch(BASE_URL, {
                     method: "POST",
@@ -60,11 +44,32 @@
                         messages: [{ role: "user", content: userMessage }],
                     }),
                 });
-                
+
                 const data = await res.json();
-                responseDiv.innerText = data.choices?.[0]?.message?.content || "无响应";
+                const aiResponse = data.choices?.[0]?.message?.content || "无响应";
+                appendMessage("ai", aiResponse);
             } catch (error) {
-                responseDiv.innerText = "请求失败，请检查 API 设置";
+                appendMessage("ai", "请求失败，请检查 API 设置");
+            }
+        }
+
+        function appendMessage(role, text) {
+            const chatbox = document.getElementById("chatbox");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("p-2", "rounded-lg", "max-w-xs");
+            if (role === "user") {
+                messageDiv.classList.add("bg-blue-500", "text-white", "self-end", "ml-auto");
+            } else {
+                messageDiv.classList.add("bg-gray-300", "text-black", "self-start", "mr-auto");
+            }
+            messageDiv.textContent = text;
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight; // 滚动到底部
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
             }
         }
     </script>
